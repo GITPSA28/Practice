@@ -1,0 +1,38 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  height: 100dvh;
+  overflow: auto;
+}
+#reset {
+  margin-top: 10px;
+}
+.container {
+  display: grid;
+  width: fit-content;
+  grid-template-columns: repeat(7, 50px);
+  /* grid-template-rows: repeat(7, 50px); */
+  column-gap: 2px;
+  overflow: hidden;
+  row-gap: 2px;
+  background-color: black;
+  border: 2px solid black;
+}
+.box {
+  width: 50px;
+  height: 50px;
+  background-color: white;
+}
+.yellow {
+  background-color: yellow;
+}
+.red {
+  background-color: red;
+}
