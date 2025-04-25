@@ -1,72 +1,106 @@
-const SIZE = 7;
-const container = document.querySelector(".container");
+const container = document.querySelector("#container");
 const reset = document.querySelector("#reset");
-const COLOUR = ["blue", "white", "yellow"];
-const matrix = new Array(SIZE).fill().map(() => Array(SIZE).fill(1));
-container.style.gridTemplateColumns = `repeat(${SIZE}, 50px)`;
+const container2 = document.querySelector("#container2");
+const reset2 = document.querySelector("#reset2");
 
-function renderBox({ container, color = "white", box = null }) {
-  if (box) {
-    box.style.backgroundColor = color;
-    return;
+class CrossContainer {
+  #container;
+  #size;
+  #matrix;
+  #colors;
+  constructor(
+    container,
+    size = 5,
+    boxSize = "50px",
+    colors = ["blue", "white", "yellow"]
+  ) {
+    this.#matrix = new Array(size).fill().map(() => Array(size).fill(1));
+    this.#container = container;
+    this.#container.style.gridTemplateColumns = `repeat(${size}, ${boxSize})`;
+    this.#container.style.gridTemplateRows = `repeat(${size}, ${boxSize})`;
+    this.#size = size;
+    this.#colors = colors;
+    this.#render(true);
   }
-  box = document.createElement("div");
-  box.classList.add("box");
-  container.appendChild(box);
-  return box;
-}
+  #renderBox = function (color = this.#colors[1], box = null) {
+    if (!box) {
+      box = document.createElement("div");
+      box.classList.add("box");
+      this.#container.appendChild(box);
+    }
+    box.style.backgroundColor = color;
+    return box;
+  };
 
-function render({ matrix, init = false, container }) {
-  if (init) container.innerHTML = "";
-  for (let i = 0; i < matrix.length; i++) {
-    for (let j = 0; j < matrix[0].length; j++) {
-      if (init) {
-        let box = renderBox({ container });
-        box.dataset.row = i;
-        box.dataset.col = j;
+  #render = function (init = false) {
+    if (init) this.#container.innerHTML = "";
+    for (let i = 0; i < this.#size; i++) {
+      for (let j = 0; j < this.#size; j++) {
+        if (init) {
+          let box = this.#renderBox(this.#colors[1]);
+          box.dataset.row = i;
+          box.dataset.col = j;
+        }
       }
     }
-  }
-}
+  };
 
-function update(container, matrix) {
-  const boxes = container.querySelectorAll(".box");
-  boxes.forEach((box) => {
+  #update = function () {
+    const boxes = this.#container.querySelectorAll(".box");
+    boxes.forEach((box) => {
+      let i = +box.dataset.row;
+      let j = +box.dataset.col;
+      let code = this.#matrix[i][j];
+      this.#renderBox(this.#colors[code], box);
+    });
+  };
+
+  #cross = function (m, n) {
+    const sum = m + n;
+    const dif = m - n;
+    this.#container.childNodes.forEach((box) => {
+      if (box.className !== "box") return;
+      let i = +box.dataset.row;
+      let j = +box.dataset.col;
+      if (i == m && j == n) {
+        this.#matrix[i][j] = 2;
+      } else if (i + j === sum || i - j === dif) {
+        this.#matrix[i][j] = 0;
+      } else this.#matrix[i][j] = 1;
+    });
+  };
+  onTileClick = function (e) {
+    const box = e.target;
     let i = +box.dataset.row;
     let j = +box.dataset.col;
-    let code = matrix[i][j];
-    renderBox({ container, color: COLOUR[code], box });
-  });
+    this.#cross(i, j);
+    this.#update();
+  };
+  onResetClick = function () {
+    for (let i = 0; i < this.#size; i++) {
+      for (let j = 0; j < this.#size; j++) {
+        this.#matrix[i][j] = 1;
+      }
+    }
+    this.#update();
+  };
 }
-
-function cross(matrix, m, n) {
-  const sum = m + n;
-  const dif = m - n;
-  container.childNodes.forEach((box) => {
-    if (box.className !== "box") return;
-    let i = +box.dataset.row;
-    let j = +box.dataset.col;
-    if (i == m && j == n) {
-      matrix[i][j] = 2;
-    } else if (i + j === sum || i - j === dif) {
-      matrix[i][j] = 0;
-    } else matrix[i][j] = 1;
-  });
-}
-render({ matrix, init: true, container });
+const CrossGrid = new CrossContainer(container);
 container.addEventListener("click", function (e) {
   //   console.log(e.target);
-  const box = e.target;
-  let i = +box.dataset.row;
-  let j = +box.dataset.col;
-  cross(matrix, i, j);
-  update(container, matrix);
+  CrossGrid.onTileClick(e);
 });
 reset.addEventListener("click", function () {
-  for (let i = 0; i < matrix.length; i++) {
-    for (let j = 0; j < matrix[0].length; j++) {
-      matrix[i][j] = 1;
-    }
-  }
-  update(container, matrix);
+  CrossGrid.onResetClick();
+});
+const CrossGrid2 = new CrossContainer(container2, 6, "50px", [
+  "#192304",
+  "grey",
+  "#228833",
+]);
+container2.addEventListener("click", function (e) {
+  CrossGrid2.onTileClick(e);
+});
+reset2.addEventListener("click", function () {
+  CrossGrid2.onResetClick();
 });
